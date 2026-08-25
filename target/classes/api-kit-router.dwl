@@ -1,8 +1,8 @@
 %dw 2.0
 output application/json
 
-var inputUrl = yy.requestPath
-
+var inputUrl = payload.requestPath
+var inputSegments = inputUrl splitBy "/"
 var endpoint = [
   {"/api/orders/{clientType}/{clientId}":[3,4]}, 
   {"/supplier-parcels/{ucs}/status":[2]}, 
@@ -10,31 +10,35 @@ var endpoint = [
   {"/api/asns/status": []}
 ]
 
-var inputSegments = inputUrl splitBy "/"
-
 ---
 endpoint map (item) -> do {
-
+    // Get the URL template string out of the object keys safely
     var templateKey = (keysOf(item))[0] as String
-    var indices = item[templateKey]
-    
     var templateSegments = templateKey splitBy "/"
+    var indices = item[templateKey]
 
-    var extractedValues = indices reduce (index, acc = {}) -> do {
-        var paramName = templateSegments[index] replace /[{}]/ with ""
-        var paramValue = inputSegments[index]
+    var valuesArray = indices map (idx) -> do {
+        // Step A: Grab the parameter name (e.g., "{clientId}")
+        var rawName = templateSegments[idx]
+        // Step B: Clean it up using basic string replacements
+        var cleanName = rawName replace "{" with "" replace "}" with ""
+        // Step C: Match it to the value in the exact same position of the input URL
+        var realValue = inputSegments[idx]
         ---
-        acc ++ { (paramName): paramValue }
+        // Output a simple key-value pair
+        { (cleanName): realValue }
     }
 
-    var finalResultSet = (templateSegments map (segment, idx) -> 
-        if (indices contains idx) inputSegments[idx] else segment
-    ) joinBy "/"
+    var finalValuesObject = {(valuesArray)}
+
+    var rebuiltSegments = templateSegments map (segment, currentIdx) -> {
+        value: if (indices contains currentIdx) inputSegments[currentIdx] else segment
+    }.value
 
     ---
     {
         "url": templateKey,
-        "values": extractedValues,
-        "resultSet": finalResultSet
+        "values": finalValuesObject,
+        "resultSet": rebuiltSegments joinBy "/"
     }
 }
