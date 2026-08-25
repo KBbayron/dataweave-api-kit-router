@@ -1,0 +1,14 @@
+# --- carpetas de compilación de maven ---
+target/
+*.jar
+
+# --- archivos temporales de visual studio code ---
+.vscode/
+.factorypath
+.project
+.classpath
+.settings/
+
+# --- archivos basura del sistema operativo (macos) ---
+.DS_Store
+Thumbs.db
