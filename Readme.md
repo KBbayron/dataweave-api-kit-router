@@ -5,7 +5,7 @@
 
 ## Init script 
 
-1. Cmd + Shift + P
+1. Cmd + Shift + P -> MacOs
 2. ```bash
     Java: Clean Java Language Server Workspace
     ```
@@ -14,7 +14,7 @@
 
 ## Create new project
 
-1. Cmd + Shift + P
+1. Cmd + Shift + P  -> MacOs
 2. ```bash 
     DataWeave: Create New Library Project
     ```
